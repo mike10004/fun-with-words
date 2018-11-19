@@ -69,31 +69,35 @@ def main():
     logging.basicConfig(level=logging.__dict__[args.log_level])
     pool = LetterPool.build(args.letters)
     previous = None
-    while True:
-        _log.debug("pool: %s (num_blanks = %s)", pool.letters, pool.num_blanks)
-        print("pool:", pool.render())
-        if pool.used:
-            print("state:", ''.join(pool.used))
-        print()
-        entry = input("consume: ").upper()
-        print()
-        if entry == '/':
-            entry = previous or ''
-        if entry == '/EXIT':
-            break
-        elif entry == '/RESET':
-            pool.reset()
-        elif entry == '/SHUFFLE' or entry == '/S':
-            pool.shuffle()
-        elif entry == _BLANK:
-            print("using blanks not supported yet", file=sys.stderr)
-        elif entry and entry[0] == '/':
-            print("command not recognized:", entry, file=sys.stderr)
-        elif entry:
-            pool.consume(entry)
-        else:
-            raise ValueError(entry)
-        previous = entry
+    try:
+        while True:
+            _log.debug("pool: %s (num_blanks = %s)", pool.letters, pool.num_blanks)
+            print("pool:", pool.render())
+            if pool.used:
+                print("state:", ''.join(pool.used))
+            print()
+            entry = input("consume: ").upper()
+            print()
+            if entry == '/':
+                entry = previous or ''
+            if entry == '/EXIT':
+                break
+            elif entry == '/RESET':
+                pool.reset()
+            elif entry == '/SHUFFLE' or entry == '/S':
+                pool.shuffle()
+            elif entry == _BLANK:
+                print("using blanks not supported yet", file=sys.stderr)
+            elif entry and entry[0] == '/':
+                print("command not recognized:", entry, file=sys.stderr)
+            elif entry:
+                pool.consume(entry)
+            else:
+                raise ValueError(entry)
+            previous = entry
+    except KeyboardInterrupt:
+        print("\nquitting now", file=sys.stderr)
+        pass
     return 0            
 
 
