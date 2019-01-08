@@ -9,6 +9,17 @@ from argparse import ArgumentParser
 _BLANK = '_'
 _ALPHABET = ''
 _log = logging.getLogger('anagrammery_interactive')
+_CMD_LAST = '/'
+_CMD_EXIT = '/EXIT'
+_CMD_SHUFFLE = '/SHUFFLE'
+_CMD_ALPHABETIZE = '/ALPHABETIZE'
+_ALIASES = {
+    '/LAST': '/',
+    '/QUIT': '/EXIT',
+    '/ALPHA': '/ALPHABETIZE',
+    '/A': '/ALPHABETIZE',
+}
+_SAMPLE_COMMANDS = tuple([c.lower() for c in (_CMD_SHUFFLE, _CMD_ALPHABETIZE, _CMD_EXIT)])
 
 
 class LetterPool(object):
@@ -18,6 +29,7 @@ class LetterPool(object):
         self.original_num_blanks = num_blanks
         self.num_blanks = num_blanks
         self.used = []
+        self.mode = 'strict'
     
     @classmethod
     def build(cls, letters_token):
@@ -42,16 +54,26 @@ class LetterPool(object):
         self.used.clear()
         self.num_blanks = self.original_num_blanks
     
+    def get_unused(self):
+        unused = list(self.letters)
+        for lt in self.used:
+            unused.remove(lt)
+        return unused
+
     def consume(self, chars):
         strangers = []
         for ch in chars:
             if ch.strip():
-                if not ch in self.letters:
+                strange = False
+                unused = self.get_unused()
+                if not ch in unused:
                     if self.num_blanks > 0:
                         self.num_blanks -= 1
                     else:
+                        strange = True
                         strangers.append(ch)
-                self.used.append(ch)
+                if not strange or self.mode == 'lenient':
+                    self.used.append(ch)
         if strangers:
             _log.info("\"used\" letters not in pool: %s", strangers)
     
@@ -59,6 +81,32 @@ class LetterPool(object):
         shuffled = list(self.letters)
         random.shuffle(shuffled)
         self.letters = shuffled
+    
+    def get_shuffled(self, n=None, subset=None):
+        if n is None:
+            shuffled = list(self.letters if subset is None else subset)
+            random.shuffle(shuffled)
+            return tuple(shuffled)
+        else:
+            return set([self.get_shuffled(subset=self.get_unused()) for i in range(n)])
+    
+    def alphabetize(self):
+        alphabetized = sorted(self.letters)
+        self.letters = alphabetized
+
+
+def normalize_cmd(cmd):
+    if cmd and cmd[0] == '/':
+        splitted = cmd.split()
+        cmd, params = splitted[0], splitted[1:]
+    else:
+        params = tuple()
+    cmd = cmd.upper()
+    try:
+        cmd = _ALIASES[cmd]
+    except KeyError:
+        pass
+    return cmd, params
 
 
 def main():
@@ -76,7 +124,7 @@ def main():
             if pool.used:
                 print("state:", ''.join(pool.used))
             print()
-            entry = input("consume: ").upper()
+            entry, params = normalize_cmd(input("consume: "))
             print()
             if entry == '/':
                 entry = previous or ''
@@ -85,14 +133,28 @@ def main():
             elif entry == '/RESET':
                 pool.reset()
             elif entry == '/SHUFFLE' or entry == '/S':
-                pool.shuffle()
+                if params:
+                    n = int(params[0])
+                    shuffles = pool.get_shuffled(n)
+                    for s in shuffles:
+                        print(''.join(s))
+                    if len(shuffles) < n:
+                        _log.info("more shuffles requested %s than available %s", n, len(shuffles))
+                    print()
+                else:
+                    pool.shuffle()
             elif entry == _BLANK:
                 print("using blanks not supported yet", file=sys.stderr)
+            elif entry == _CMD_ALPHABETIZE:
+                pool.alphabetize()
             elif entry and entry[0] == '/':
                 print("command not recognized:", entry, file=sys.stderr)
             elif entry:
                 pool.consume(entry)
             else:
+                if not entry:
+                    print("enter a letter or a command ({})".format(', '.join(_SAMPLE_COMMANDS)), file=sys.stderr)
+                    continue
                 raise ValueError(entry)
             previous = entry
     except KeyboardInterrupt:
