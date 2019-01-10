@@ -19,7 +19,7 @@ if not _logging_configured:
     logging_configured = True
 
 
-_DEFAULT_PUZZEME_SET = puzzicon.read_puzzeme_set()
+_DEFAULT_PUZZEME_SET = puzzicon.load_default_puzzemes()
 _SIMPLE_PUZZEME_SET = puzzicon.create_puzzeme_set(['foo', 'bar', 'baz', 'gaw'])
 
 class TestModuleMethods(unittest.TestCase):

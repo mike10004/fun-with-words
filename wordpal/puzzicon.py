@@ -106,8 +106,10 @@ def create_puzzeme_set(ifile: Iterable[str], intolerables=None):
     return frozenset(items)
 
 
-def read_puzzeme_set(pathname=None):
-    if pathname is None:
-        pathname = '/usr/share/dict/words'
+def read_puzzeme_set(pathname):
     with open(pathname, 'r') as ifile:
         return create_puzzeme_set(ifile)
+
+
+def load_default_puzzemes():
+    return read_puzzeme_set('/usr/share/dict/words')
