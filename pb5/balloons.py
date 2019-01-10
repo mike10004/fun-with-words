@@ -14,7 +14,7 @@ _BLANK = '?'
 class WordSearcher(object):
 
     def __init__(self, puzzeme_set):
-        self.puzzerarian = puzzicon.Puzzerarian(puzzeme_set)
+        self.puzzerarian = puzzicon.Puzzarian(puzzeme_set)
     
     def find(self, balloons, num_balloons):
         assert isinstance(num_balloons, int) and num_balloons > 0, "target length must be a positive integer"

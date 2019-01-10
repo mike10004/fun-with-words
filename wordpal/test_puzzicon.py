@@ -6,7 +6,7 @@ import sys
 import logging
 import unittest
 from . import puzzicon
-from .puzzicon import Puzzeme, Puzzerarian
+from .puzzicon import Puzzeme, Puzzarian
 
 _log = logging.getLogger(__name__)
 _logging_configured = False
@@ -51,13 +51,13 @@ class TestPuzzeme(unittest.TestCase):
 class TestPuzzerarian(unittest.TestCase):
 
     def test_search_many(self):
-        p = Puzzerarian(_DEFAULT_PUZZEME_SET)
+        p = Puzzarian(_DEFAULT_PUZZEME_SET)
         results = p.search([lambda p: p.canonical.startswith('PUZZ')])
         results = list(results)
         self.assertEqual(10, len(results))
     
     def test_search_one(self):
-        p = Puzzerarian(_DEFAULT_PUZZEME_SET)
+        p = Puzzarian(_DEFAULT_PUZZEME_SET)
         results = p.search([puzzicon.Filters.canonical('puzzle')], 0, 1)
         self.assertIsInstance(results, list)
         self.assertEqual(1, len(results))

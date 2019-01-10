@@ -81,7 +81,7 @@ class Filters(object):
         return Filters.canonical(lambda c: re.fullmatch(pattern, c) is not None)
 
 
-class Puzzerarian(object):
+class Puzzarian(object):
     """Librarian who can find the puzzemes you desire."""
 
     def __init__(self, puzzeme_set: Set[Puzzeme]):
