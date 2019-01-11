@@ -9,13 +9,20 @@ from anagrammary import LetterPool, _BLANK, _CMD_ALPHABETIZE, normalize_cmd, _SA
 _log = logging.getLogger()
 
 
+def read_letters(args):
+    if args.letters and args.letters[0]:
+        return args.letters[0]
+    return input("pool: ")
+
+
 def main():
     p = ArgumentParser()
-    p.add_argument("letters", help="pool of letters")
+    p.add_argument("letters", nargs='*', help="pool of letters")
     p.add_argument("--log-level", choices=('DEBUG', 'INFO', 'WARN', 'ERROR'), default='INFO', help="set log level")
     args = p.parse_args()
     logging.basicConfig(level=logging.__dict__[args.log_level])
-    pool = LetterPool.build(args.letters)
+    letters = read_letters(args)
+    pool = LetterPool.build(letters)
     previous = None
     try:
         while True:
