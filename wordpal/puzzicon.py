@@ -4,6 +4,7 @@ import re
 import os
 import fnmatch
 import logging
+import unidecode
 from typing import List, Tuple, Dict, Callable, Set, Iterable
 
 _log = logging.getLogger(__name__)
@@ -17,6 +18,13 @@ def _create_constant_callable(retval):
 
 _CALLABLE_TRUE = _create_constant_callable(True)
 _CALLABLE_FALSE = _create_constant_callable(False)
+_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+def _contains_nonalphabet(letters):
+    for l in letters:
+        if l not in _ALPHABET:
+            return True
+    return False
 
 class Puzzeme(tuple):
     
@@ -36,6 +44,8 @@ class Puzzeme(tuple):
     
     @classmethod
     def canonicalize(cls, rendering):
+        if _contains_nonalphabet(rendering):
+            rendering = unidecode.unidecode(rendering)
         canonical = re.sub(r'[^A-Za-z]', '', rendering).strip().upper()
         return canonical
     
@@ -85,12 +95,19 @@ class Puzzarian(object):
     """Librarian who can find the puzzemes you desire."""
 
     def __init__(self, puzzeme_set: Set[Puzzeme]):
-        self.puzzemes = puzzeme_set
+        self.puzzemes = frozenset(puzzeme_set)
+        self.puzzeme_dict = {}
+        for p in self.puzzemes:
+            self.puzzeme_dict[p.canonical] = p
     
     def search(self, predicates, offset=None, limit=None):
         xform = _IDENTITY if offset is None and limit is None else lambda f: (list(f))[offset:offset+limit]
         filtered = filter(Filters.conjoin(predicates), self.puzzemes)
         return xform(filtered)
+    
+    def has_canonical(self, word):
+        """Check for an exact match."""
+        return Puzzeme.canonicalize(word) in self.puzzeme_dict
 
 
 def create_puzzeme_set(ifile: Iterable[str], intolerables=None):

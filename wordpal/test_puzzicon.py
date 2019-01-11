@@ -7,17 +7,9 @@ import logging
 import unittest
 from . import puzzicon
 from .puzzicon import Puzzeme, Puzzarian
+import common.testing
 
-_log = logging.getLogger(__name__)
-_logging_configured = False
-
-if not _logging_configured:
-    level_str = os.getenv('UNIT_TEST_LOG_LEVEL') or 'INFO'
-    level = logging.__dict__.get(level_str, 'INFO')
-    logging.basicConfig(level=level)
-    _log.debug("logging configured at level %s (%s)", level, level_str)
-    logging_configured = True
-
+common.testing.configure_logging()
 
 _DEFAULT_PUZZEME_SET = puzzicon.load_default_puzzemes()
 _SIMPLE_PUZZEME_SET = puzzicon.create_puzzeme_set(['foo', 'bar', 'baz', 'gaw'])
@@ -34,6 +26,10 @@ pumpkin"""
         ifile = io.StringIO(wordlist)
         puzzemes = puzzicon.create_puzzeme_set(ifile)
         self.assertSetEqual(set([Puzzeme('apples'), Puzzeme('peaches'), Puzzeme('pumpkin'),]), puzzemes)
+    
+    def test_alphabet(self):
+        self.assertEqual(26 * 2, len(puzzicon._ALPHABET))
+        self.assertEqual(26 * 2, len(set(puzzicon._ALPHABET)))
 
 
 class TestPuzzeme(unittest.TestCase):
@@ -42,10 +38,18 @@ class TestPuzzeme(unittest.TestCase):
         c = Puzzeme.canonicalize("puzzle's\n")
         self.assertEqual('PUZZLES', c)
 
+    def test_canonicalize_diacritics(self):
+        c = Puzzeme.canonicalize(u'Málaga')
+        self.assertEqual('MALAGA', c)
+
     def test_create(self):
         p = Puzzeme('a')
         self.assertEqual('A', p.canonical)
         self.assertEqual('a', p.rendering)
+    
+    def test_create_diacritics(self):
+        p = Puzzeme(u'café')
+        self.assertEqual('CAFE', p.canonical)
 
 
 class TestPuzzerarian(unittest.TestCase):
@@ -62,6 +66,12 @@ class TestPuzzerarian(unittest.TestCase):
         self.assertIsInstance(results, list)
         self.assertEqual(1, len(results))
         self.assertEqual('puzzle', results[0].rendering)
+    
+    def test_has_canonical(self):
+        p = Puzzarian(_SIMPLE_PUZZEME_SET)
+        self.assertTrue(p.has_canonical('baz'))
+        self.assertTrue(p.has_canonical('Foo'))
+        self.assertFalse(p.has_canonical('oranges'))
 
 
 class TestFilters(unittest.TestCase):

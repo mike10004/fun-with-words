@@ -15,7 +15,7 @@ def main():
     parser.add_argument("-n", "--length", type=int, default=3)
     args = parser.parse_args()
     logging.basicConfig(level=logging.__dict__[args.log_level])
-    searcher = WordSearcher(puzzicon.read_puzzeme_set())
+    searcher = WordSearcher(puzzicon.load_default_puzzemes())
     balloons = list()
     for b in args.balloons:
         if b.startswith('@'):
