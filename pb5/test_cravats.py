@@ -79,3 +79,14 @@ class TestWordProducer(unittest.TestCase):
             self.assertEqual(len(lettersets), len(word), "each word produced must have length equal to number of lettersets")
             produced.append(word)
         self.assertEqual(3, len(produced))
+
+    def test_restrict_perms3(self):
+        producer = WordProducer(permute=True, allow_duplicates=False, restrict_perms='B')
+        produced = []
+        lettersets = ['AB', 'C', 'D']
+        for word in producer.produce(lettersets):
+            _log.debug("produced %s", word)
+            self.assertIsInstance(word, str)
+            self.assertEqual(len(lettersets), len(word), "each word produced must have length equal to number of lettersets; found {}".format(word))
+            produced.append(word)
+        self.assertEqual(2, len(produced))

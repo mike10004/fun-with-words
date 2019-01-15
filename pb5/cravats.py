@@ -38,14 +38,15 @@ class WordProducer(object):
         if self.permute:
             if self.restrict_perms:
                 for combo in cartesian:
-                    unrestricted = WordProducer._remove_one(combo, self.restrict_perms)
-                    for tail in itertools.permutations(unrestricted):
-                        value = self.restrict_perms + ''.join(tail)
-                        if value in used:
-                            continue
-                        if not self.allow_duplicates:
-                            used.add(value)
-                        yield value
+                    if self.restrict_perms in combo:
+                        unrestricted = WordProducer._remove_one(combo, self.restrict_perms)
+                        for tail in itertools.permutations(unrestricted):
+                            value = self.restrict_perms + ''.join(tail)
+                            if value in used:
+                                continue
+                            if not self.allow_duplicates:
+                                used.add(value)
+                            yield value
             else:
                 for combo in cartesian:
                     for seq in itertools.permutations(combo):
