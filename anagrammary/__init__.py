@@ -8,7 +8,6 @@ import random
 from argparse import ArgumentParser
 
 _BLANK = '_'
-_ALPHABET = ''
 _log = logging.getLogger('anagrammery_interactive')
 _CMD_LAST = '/'
 _CMD_EXIT = '/EXIT'
