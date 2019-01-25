@@ -80,6 +80,10 @@ class TestTemplate(unittest.TestCase):
         template = lookup.Template.create("ABCDEF")
         actual = list(template.iterate_possibles())
         self.assertListEqual(['ABCDEF'], actual)
+    
+    def test_create_garbage(self):
+        template = lookup.Template.create('S G S E')
+        self.assertTupleEqual(template.known_pool, ('s', 'G', 'S', 'E',))
 
 
 class TestModule(unittest.TestCase):

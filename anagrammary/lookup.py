@@ -139,18 +139,22 @@ class Template(object):
 
     @classmethod
     def create(cls, seq: str):
+        assert isinstance(seq, str), "expect string argument"
         chars = list(seq)
         blankpools = []
         clean_chars = []
         pool = None
         for ch in chars:
+            ch = ch.upper()
             if pool is None:
                 if ch in _BLANKS:
                     blankpools.append(_ALPHABET)
                 elif ch == '[':
                     pool = []
-                else:
+                elif ch in _ALPHABET:
                     clean_chars.append(ch)
+                else:
+                    _log.debug("ignored: '%s'", ch)
             else:
                 if ch == ']':
                     blankpools.append(pool)
