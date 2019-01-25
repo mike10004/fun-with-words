@@ -4,8 +4,13 @@ import re
 import os
 import fnmatch
 import logging
-import unidecode
 from typing import List, Tuple, Dict, Callable, Set, Iterable
+try:
+    import unidecode
+    unicode_normalize = unidecode.unidecode
+except ModuleNotFoundError:
+    import unicodedata
+    unicode_normalize = lambda input_str: unicodedata.normalize('NFKD', input_str).encode('ASCII', 'ignore')
 
 _log = logging.getLogger(__name__)
 
@@ -45,7 +50,7 @@ class Puzzeme(tuple):
     @classmethod
     def canonicalize(cls, rendering):
         if _contains_nonalphabet(rendering):
-            rendering = unidecode.unidecode(rendering)
+            rendering = unicode_normalize(rendering)
         canonical = re.sub(r'[^A-Za-z]', '', rendering).strip().upper()
         return canonical
     
